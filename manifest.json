@@ -1,0 +1,40 @@
+{
+    "name": "HMH Metadata Authoring Extension",
+    "description": "Synchronize authoring environments with an external application for extended authoring capabilities",
+    "version": "0.1",
+    "manifest_version": 2,
+    "permissions": [
+        "storage",
+        "tabs",
+        "webNavigation",
+        "activeTab"
+    ],
+    "browser_action": {
+        "default_icon": "images/icon.png",
+        "default_title": "Edit point of use metadata",
+        "default_popup": "popup.html"
+    },
+    "background": {
+        "page": "background.html"
+    },
+    "content_scripts": [
+        {
+            "matches": [
+                "https://habitat.inkling.com/project/*"
+            ],
+            "js": [
+                "scripts/habitat-content-script.js"
+            ],
+            "all_frames": true
+        },
+        {
+            "matches": [
+                "https://s3.amazonaws.com/static.tribalnova.com/habitat/poc/metadata-app/*"
+            ],
+            "js": [
+                "scripts/app-content-script.js"
+            ],
+            "all_frames": true
+        }
+    ]
+}
