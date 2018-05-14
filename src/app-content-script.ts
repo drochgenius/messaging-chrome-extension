@@ -1,3 +1,4 @@
+import { IActionMessageEvent } from './model';
 /**
  * Content Script that gets injected in the HMH point of use metadata web application
  *
@@ -15,7 +16,7 @@ port.onMessage.addListener((msg: {}): void => {
 });
 
 // Relay application messages to chrome extension
-self.addEventListener('message', (evt: MessageEvent): void => {
+self.addEventListener('message', (evt: IActionMessageEvent): void => {
     const action: string = evt.data.action;
     if (action === 'select') {
         console.log('Selecting item', evt.data);

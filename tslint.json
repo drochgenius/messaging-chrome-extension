@@ -1,7 +1,5 @@
 {
-    "extends": [
-        "tslint-microsoft-contrib"
-    ],
+    "extends": ["tslint-microsoft-contrib"],
     "rules": {
         "mocha-no-side-effect-code": false,
         "missing-jsdoc": false,
@@ -11,10 +9,16 @@
         "no-void-expression": false,
         "no-redundant-jsdoc": false,
         "prefer-type-cast": false,
+        "strict-boolean-expressions": false,
         "trailing-comma": [
             true,
             {
-                "multiline": "always",
+                "multiline": {
+                    "objects": "always",
+                    "arrays": "always",
+                    "functions": "never",
+                    "typeLiterals": "ignore"
+                },
                 "singleline": "never"
             }
         ],

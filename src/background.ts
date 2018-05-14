@@ -8,7 +8,8 @@ const HABITAT_URL_PATTERN: string = 'https://habitat.inkling.com/project';
 const HABITAT_PORT_NAME: string = 'habitat';
 
 // Application
-const APP_URL: string = 'https://s3.amazonaws.com/static.tribalnova.com/habitat/poc/metadata-app';
+const APP_URL: string =
+    'https://s3.amazonaws.com/static.tribalnova.com/habitat/poc/metadata-app';
 const APP_PORT_NAME: string = 'app';
 
 let habitatPort: chrome.runtime.Port;
@@ -19,22 +20,25 @@ function establishHabitatCommunicationChannel(port: chrome.runtime.Port): void {
     habitatPort = port;
     port.onMessage.addListener((msg: {}): void => {
         // Create the Application Tab if not already created
-        chrome.tabs.query({ url: `${APP_URL}/*` }, (results: chrome.tabs.Tab[]) => {
-            for (const tab of results) {
-                if (!appPort) {
-                    chrome.tabs.reload(tab.id);
+        chrome.tabs.query(
+            { url: `${APP_URL}/*` },
+            (results: chrome.tabs.Tab[]) => {
+                for (const tab of results) {
+                    if (!appPort) {
+                        chrome.tabs.reload(tab.id);
 
-                    return;
+                        return;
+                    }
+                }
+
+                if (appPort) {
+                    console.log('Habitat -----> Application', msg);
+                    appPort.postMessage(msg);
+                } else {
+                    console.warn('application port disconnected');
                 }
             }
-
-            if (appPort) {
-                console.log('Habitat -----> Application', msg);
-                appPort.postMessage(msg);
-            } else {
-                console.warn('application port disconnected');
-            }
-        });
+        );
     });
 }
 
@@ -43,22 +47,25 @@ function establishAppCommunicationChannel(port: chrome.runtime.Port): void {
 
     appPort = port;
     port.onMessage.addListener((msg: {}): void => {
-        chrome.tabs.query({ url: `${HABITAT_URL_PATTERN}/*` }, (results: chrome.tabs.Tab[]) => {
-            for (const tab of results) {
-                if (!habitatPort) {
-                    chrome.tabs.reload(tab.id);
+        chrome.tabs.query(
+            { url: `${HABITAT_URL_PATTERN}/*` },
+            (results: chrome.tabs.Tab[]) => {
+                for (const tab of results) {
+                    if (!habitatPort) {
+                        chrome.tabs.reload(tab.id);
 
-                    return;
+                        return;
+                    }
+                }
+
+                if (habitatPort) {
+                    console.log('Application -----> Habitat', msg);
+                    habitatPort.postMessage(msg);
+                } else {
+                    console.warn('habitat port disconnected');
                 }
             }
-
-            if (habitatPort) {
-                console.log('Application -----> Habitat', msg);
-                habitatPort.postMessage(msg);
-            } else {
-                console.warn('habitat port disconnected');
-            }
-        });
+        );
     });
 }
 
@@ -79,19 +86,28 @@ chrome.runtime.onInstalled.addListener(() => {
     chrome.runtime.onMessage.addListener((message: IContentActionMessage) => {
         console.log('Messsage recieved from popup', message);
         if (message.action === 'open') {
-            chrome.tabs.query({ url: `${APP_URL}/*` }, (results: chrome.tabs.Tab[]) => {
-                if (results.length < 1) {
-                    chrome.tabs.create({ url: `${APP_URL}/index.html` });
-                } else {
-                    const tabs = [];
-                    let windowId;
-                    for (const tab of results) {
-                        tabs.push(tab.index);
-                        windowId = tab.windowId;
+            chrome.tabs.query(
+                { url: `${APP_URL}/*` },
+                (results: chrome.tabs.Tab[]) => {
+                    if (results.length < 1) {
+                        chrome.tabs.create({ url: `${APP_URL}/index.html` });
+                    } else {
+                        const tabs: number[] = [];
+                        let windowId: number;
+                        for (const tab of results) {
+                            tabs.push(tab.index);
+                            windowId = tab.windowId;
+                        }
+
+                        const highlightInfo: chrome.tabs.HighlightInfo = {
+                            windowId,
+                            tabs,
+                        };
+
+                        chrome.tabs.highlight(highlightInfo, null);
                     }
-                    chrome.tabs.highlight({ windowId, tabs }, null);
                 }
-            });
+            );
         }
     });
 });

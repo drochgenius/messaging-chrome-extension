@@ -1,4 +1,3 @@
-
 export interface IHabitatItem {
     contentType: string;
     uuid: string;
@@ -19,4 +18,8 @@ export interface IContentActionMessage {
     action: string;
     item: string;
     selected: boolean;
+}
+
+export interface IActionMessageEvent extends MessageEvent {
+    data: IContentActionMessage;
 }
