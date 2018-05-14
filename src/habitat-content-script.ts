@@ -6,6 +6,8 @@ import { IContentActionMessage, IContentUpdateMessage, IHabitatItem } from './mo
  */
 const HABITAT_PORT_NAME: string = 'habitat';
 
+let contentLoadHandler: () => void;
+
 function deepEqual(obj1: object, obj2: object) {
     return JSON.stringify(obj1) === JSON.stringify(obj2);
 }
@@ -33,18 +35,20 @@ class HabitatInspector {
 
         // Initial handshake with the chrome extension
         this.port.postMessage({ hello: 'I am Inkling Habitat' });
+
+        contentLoadHandler = this.onContentLoad.bind(this);
     }
 
     /**
      * When user navigates from page to page in Habitat, we need to reparse the content
      */
     private observeNavigation(): void {
-        const observer: MutationObserver = new MutationObserver(this.onContentLoad.bind(this));
+        const observer: MutationObserver = new MutationObserver(contentLoadHandler);
         observer.observe(document.getElementById('status-message'), { attributes: true });
     }
 
     private portListener(msg: IContentActionMessage): void {
-        console.log('HABITAT RX MESSAGE', msg, this.contentDocument);
+        console.log('HABITAT RX MESSAHE', msg, this.contentDocument);
         if (msg.action === 'initialize' && this.contentDocument) {
             this.messagePayload.items = [];
             this.updateItems();
@@ -74,7 +78,7 @@ class HabitatInspector {
                 iframe.addEventListener('load', (evt: Event) => this.onIframeLoad(evt.target as HTMLIFrameElement));
             }
         } else {
-            setTimeout(this.onContentLoad.bind(this), 250);
+            setTimeout(contentLoadHandler, 250);
         }
     }
 
